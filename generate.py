@@ -103,8 +103,14 @@ class CrosswordCreator():
                 if len(domain)!=key.length:
                     values.remove(domain)
 
-        for key,values in self.domains.copy().items():
-            print(key,values)
+        # for key,values in self.domains.copy().items():
+        #     print(key,values)
+
+        # for var in self.crossword.variables:
+        #     print(str(var)[:6])
+
+            #python generate.py data/structure0.txt data/words0.txt
+
         # for var in self.domains:
         #     self.domains[var] = {
         
@@ -116,28 +122,57 @@ class CrosswordCreator():
         """
         Make variable `x` arc consistent with variable `y`.
         """
-        revision_made=0
-
-
+        revised=False
+        overlap = self.crossword.overlaps[x,y]
+        if overlap is None:
+            return False
+        (i,j)=overlap
         for x_word in self.domains[x].copy():
-            (i,j) = self.crossword.overlaps[x,y]
             ok=0
             for y_word in self.domains[y].copy():
                 if x_word[i]== y_word[j]:
                     ok=1
             if ok==0:
                 self.domains[x].remove(x_word)
-                revision_made=1
+                revised=True
 
 
 
-        if revision_made==1:
-            return True
-        return False
+        return revised
         raise NotImplementedError
 
    
 
+    def ac3(self, arcs=None):
+        """
+        Update `self.domains` such that each variable is arc consistent.
+        """
+        queue=[]
+        if arcs is None:
+            list=[]
+            for x in self.crossword.variables:
+                for y in self.crossword.variables:
+                    if x!=y:
+                        list.append((x,y))  
+            queue=list
+        else:
+            queue=arcs
+            
+        while queue:
+            (x,y)=queue.pop(0)
+            
+            if self.revise(x,y):
+                
+                if len(self.domains[x])==0:
+                    return False
+                for z in self.crossword.neighbors(x) - {y}:
+                    queue.append((z,x))  
+        return True
+                
+                
+        for i in queue:
+            print(i)
+    
 def main():
 
     # Check usage

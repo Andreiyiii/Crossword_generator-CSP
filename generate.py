@@ -103,13 +103,15 @@ class CrosswordCreator():
                 if len(domain)!=key.length:
                     values.remove(domain)
 
-        # for key,values in self.domains.copy().items():
-        #     print(key,values)
+        for key,values in self.domains.copy().items():
+            print(key,values)
 
         # for var in self.crossword.variables:
         #     print(str(var)[:6])
 
             #python generate.py data/structure0.txt data/words0.txt
+
+
 
         # for var in self.domains:
         #     self.domains[var] = {
@@ -170,8 +172,71 @@ class CrosswordCreator():
         return True
                 
                 
-        for i in queue:
-            print(i)
+        # for i in queue:
+        #     print(i)
+
+    def assignment_complete(self, assignment):
+        """
+        Return True if `assignment` is complete return False otherwise.
+        """
+        ok=True
+        for var in self.domains:
+            if var not in assignment or assignment[var] is None:
+                ok=False
+        return ok
+
+    def consistent(self, assignment):
+        """
+        Return True if `assignment` is consistent (words fit in crossword
+        puzzle without conflicting characters); return False otherwise.
+        """
+        for var,domain in assignment.items():
+                if len(domain) != var.length:
+                    return False
+        if len(set(assignment.values())) < len(assignment):
+            return False
+        vars = list(assignment.keys())    
+
+        for i in range(len(vars)):
+            for j in range(i+1,len(vars)):
+                overlap=self.crossword.overlaps[(vars[i],vars[j])]
+                if overlap is None:
+                    continue
+                (m,n)=overlap
+                if assignment[vars[i]][m] != assignment[vars[j]][n]:
+                    return False
+        return True
+        
+
+    def order_domain_values(self, var, assignment):
+        """
+        Return a list of values in the domain of var, sorted by
+        the number of values they rule out for neighboring variables.
+        The first value in the list,is the one that rules out the 
+        fewest values.
+        """
+        list=[]
+        neighbors=self.crossword.neighbors(var)
+        assigned_already={variable for variable in assignment}
+        neighbors=neighbors-assigned_already
+
+        how_many_dict={value:0 for value in self.domains[var]}
+        for value in self.domains[var]:
+            how_many=0
+            for neighbor in neighbors:
+                overlap=self.crossword.overlaps[(var,neighbor)]
+                if overlap !=None:
+                    (i,j)=overlap
+                    for neighbor_word in self.domains[neighbor]:
+                        if value[i]!=neighbor_word[j]:
+                            how_many+=1
+            how_many_dict[value]=how_many
+
+        sorted_dict= sorted(how_many_dict, key=lambda x:how_many_dict[x])
+        list = [key for key in sorted_dict]
+        return list
+
+        raise NotImplementedError
     
 def main():
 

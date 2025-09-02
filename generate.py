@@ -103,16 +103,6 @@ class CrosswordCreator():
                 if len(domain)!=key.length:
                     values.remove(domain)
 
-        for key,values in self.domains.copy().items():
-            print(key,values)
-
-        # for var in self.crossword.variables:
-        #     print(str(var)[:6])
-
-            #python generate.py data/structure0.txt data/words0.txt
-
-
-
         # for var in self.domains:
         #     self.domains[var] = {
         

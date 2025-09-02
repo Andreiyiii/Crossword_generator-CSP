@@ -236,8 +236,41 @@ class CrosswordCreator():
         list = [key for key in sorted_dict]
         return list
 
-        raise NotImplementedError
+    def select_unassigned_variable(self, assignment):
+            """
+            Return an unassigned variable not already part of assignment
+            with the minimum number of remaining values in its domain. 
+            If there is a tie, choose the variable with the most neighbors
+            """
+
+            
+            assigned_variables={var for var in assignment}
+            not_assigned=self.crossword.variables-assigned_variables
+            min_domain_dict={var:0 for var in not_assigned}
+            for var in not_assigned:
+                min_domain_dict[var]=(len(self.domains[var]),len(self.crossword.neighbors(var)))
+            sorted_dict=sorted(min_domain_dict,key=lambda x:(min_domain_dict[x][0],min_domain_dict[x][1]))
+            for item in sorted_dict:
+                return item
     
+    def backtrack(self, assignment):
+        """
+        Using Backtracking Search, return a complete assignment if possible to do so.
+        If no assignment is possible, return None.
+        """
+        if self.assignment_complete(assignment)==True:
+            return assignment
+        
+        var=self.select_unassigned_variable(assignment)
+        for value in self.order_domain_values(var,assignment):
+            assignment[var]=value
+            if self.consistent(assignment)==True:
+                result=self.backtrack(assignment)
+                if result!=None:
+                    return result
+            del assignment[var]
+        return None
+
 def main():
 
     # Check usage
